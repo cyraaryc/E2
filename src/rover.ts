@@ -32,7 +32,7 @@ class turnRight implements Command {
     direction = (direction + 1) % directions.length;
   }
 }
-const invoker = {
+const _invoker = {
   run(cmd: Command) {
     cmd.execute();
     drawRover();
