@@ -10,18 +10,23 @@ let direction = 0;
 interface Command {
   execute(): void;
 }
-
+type directionsType = { name: string; dx: number; dy: number };
+const directions: directionsType[] = [
+  { name: "North", dx: 0, dy: -1 },
+  { name: "East", dx: 1, dy: 0 },
+  { name: "South", dx: 0, dy: 1 },
+  { name: "West", dx: -1, dy: 0 },
+];
 class moveCommand implements Command {
   execute() {
-    if (direction === 0) y = Math.max(0, y - 1);
-    if (direction === 1) x = Math.min(4, x + 1);
-    if (direction === 2) y = Math.min(4, y + 1);
-    if (direction === 3) x = Math.max(0, x - 1);
+    const commandDirection = directions[direction];
+    x = Math.max(0, Math.min(4, x + commandDirection.dx));
+    y = Math.max(0, Math.min(4, y + commandDirection.dy));
   }
 }
 class turnRight implements Command {
   execute() {
-    direction = (direction + 1) % 4;
+    direction = (direction + 1) % directions.length;
   }
 }
 const invoker = {
