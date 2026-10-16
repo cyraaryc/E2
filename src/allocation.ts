@@ -5,47 +5,65 @@ const ctx = canvas.getContext("2d")!;
 const readout = document.querySelector<HTMLParagraphElement>(
   "#allocation-readout",
 )!;
-let n = 2;
-
-function u() {
-  const p = n * 3;
-  const c = 6;
-  const b = p - c;
+let producers = 2;
+type shiftResults = {
+  producers: number;
+  production: number;
+  consumption: number;
+  balance: number;
+};
+function shift(producers: number): shiftResults {
+  const production = producers * 3;
+  const consumption = 6;
+  const balance = production - consumption;
+  return { producers, production, consumption, balance };
+}
+function update() {
+  const results = shift(producers);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  renderBoxes(results);
+  renderUI(results);
+  renderReadout(results);
+}
+function renderReadout(results: shiftResults) {
+  readout.textContent =
+    `Assigned: ${results.producers}/6 · Production: ${results.production} · Consumption: ${results.consumption} · Balance: ${
+      results.balance > 0 ? "+" : ""
+    }${results.balance}`;
+}
+function renderUI(results: shiftResults) {
+  ctx.fillStyle = "#233e43";
+  ctx.font = "14px system-ui";
+  ctx.fillText(`Producers: ${results.producers} / 6`, 18, 76);
+  ctx.fillText(`Production: ${results.production}`, 18, 102);
+  ctx.fillStyle = "#27766b";
+  ctx.fillRect(18, 110, results.production * 14, 20);
+  ctx.fillStyle = "#233e43";
+  ctx.fillText(`Consumption: ${results.consumption}`, 18, 154);
+  ctx.fillStyle = "#a44d23";
+  ctx.fillRect(18, 162, results.consumption * 14, 20);
+}
+function renderBoxes(results: shiftResults) {
   for (let i = 0; i < 6; i++) {
-    ctx.fillStyle = i < n ? "#27766b" : "#c9d2c9";
+    ctx.fillStyle = i < results.producers ? "#27766b" : "#c9d2c9";
     ctx.fillRect(18 + i * 45, 16, 36, 36);
-    ctx.fillStyle = i < n ? "#ffffff" : "#233e43";
+    ctx.fillStyle = i < results.producers ? "#ffffff" : "#233e43";
     ctx.font = "16px system-ui";
     ctx.fillText(String(i + 1), 31 + i * 45, 40);
   }
-  ctx.fillStyle = "#233e43";
-  ctx.font = "14px system-ui";
-  ctx.fillText(`Producers: ${n} / 6`, 18, 76);
-  ctx.fillText(`Production: ${p}`, 18, 102);
-  ctx.fillStyle = "#27766b";
-  ctx.fillRect(18, 110, p * 14, 20);
-  ctx.fillStyle = "#233e43";
-  ctx.fillText(`Consumption: ${c}`, 18, 154);
-  ctx.fillStyle = "#a44d23";
-  ctx.fillRect(18, 162, c * 14, 20);
-  readout.textContent =
-    `Assigned: ${n}/6 · Production: ${p} · Consumption: ${c} · Balance: ${
-      b > 0 ? "+" : ""
-    }${b}`;
 }
 
 document.querySelector<HTMLButtonElement>("#allocation-less")!.onclick = () => {
-  n = Math.max(0, n - 1);
-  u();
+  producers = Math.max(0, producers - 1);
+  update();
 };
 document.querySelector<HTMLButtonElement>("#allocation-more")!.onclick = () => {
-  n = Math.min(6, n + 1);
-  u();
+  producers = Math.min(6, producers + 1);
+  update();
 };
 document.querySelector<HTMLButtonElement>("#allocation-reset")!.onclick =
   () => {
-    n = 2;
-    u();
+    producers = 2;
+    update();
   };
-u();
+update();
