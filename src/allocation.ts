@@ -12,6 +12,11 @@ type shiftResults = {
   consumption: number;
   balance: number;
 };
+type row = {
+  title: string;
+  value: number;
+  color: string;
+};
 function shift(producers: number): shiftResults {
   const production = producers * 3;
   const consumption = 6;
@@ -20,7 +25,6 @@ function shift(producers: number): shiftResults {
 }
 function update() {
   const results = shift(producers);
-  renderBoxes(results);
   renderUI(results);
   renderReadout(results);
 }
@@ -30,18 +34,36 @@ function renderReadout(results: shiftResults) {
       results.balance > 0 ? "+" : ""
     }${results.balance}`;
 }
+function createRows(results: shiftResults) {
+  return [{
+    title: "production",
+    value: results.production,
+    color: "#27766b",
+  }, {
+    title: "Consumption",
+    value: results.consumption,
+    color: "#a44d23",
+  }];
+}
+function renderRows(rows: row[]) {
+  for (let i = 0; i < rows.length; i++) {
+    const singleRow = rows[i];
+    const labelY = 102 + i * 52;
+    const barY = 110 + i * 52;
+    ctx.fillStyle = "#233e43";
+    ctx.font = "14px system-ui";
+    ctx.fillText(`${singleRow.title}: ${singleRow.value}`, 18, labelY);
+    ctx.fillStyle = singleRow.color;
+    ctx.fillRect(18, barY, singleRow.value * 14, 20);
+  }
+}
 function renderUI(results: shiftResults) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  renderBoxes(results);
   ctx.fillStyle = "#233e43";
   ctx.font = "14px system-ui";
   ctx.fillText(`Producers: ${results.producers} / 6`, 18, 76);
-  ctx.fillText(`Production: ${results.production}`, 18, 102);
-  ctx.fillStyle = "#27766b";
-  ctx.fillRect(18, 110, results.production * 14, 20);
-  ctx.fillStyle = "#233e43";
-  ctx.fillText(`Consumption: ${results.consumption}`, 18, 154);
-  ctx.fillStyle = "#a44d23";
-  ctx.fillRect(18, 162, results.consumption * 14, 20);
+  renderRows(createRows(results));
 }
 function renderBoxes(results: shiftResults) {
   for (let i = 0; i < 6; i++) {
