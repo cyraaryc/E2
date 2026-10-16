@@ -3,11 +3,12 @@ export {};
 const canvas = document.querySelector<HTMLCanvasElement>("#rover-canvas")!;
 const ctx = canvas.getContext("2d")!;
 const readout = document.querySelector<HTMLParagraphElement>("#rover-readout")!;
-const headings = ["North", "East", "South", "West"];
 let x = 2;
 let y = 2;
 let direction = 0;
+const queue: Command[] = [];
 interface Command {
+  name: string;
   execute(): void;
 }
 type directionsType = { name: string; dx: number; dy: number };
@@ -18,6 +19,7 @@ const directions: directionsType[] = [
   { name: "West", dx: -1, dy: 0 },
 ];
 class moveCommand implements Command {
+  name = "move";
   execute() {
     const commandDirection = directions[direction];
     x = Math.max(0, Math.min(4, x + commandDirection.dx));
@@ -25,6 +27,7 @@ class moveCommand implements Command {
   }
 }
 class turnRight implements Command {
+  name = "right";
   execute() {
     direction = (direction + 1) % directions.length;
   }
@@ -55,20 +58,50 @@ function drawRover() {
   ctx.fill();
   ctx.restore();
   readout.textContent = `Position: (${x}, ${y}) · Facing: ${
-    headings[direction]
+    directions[direction].name
   }`;
 }
 
 document.querySelector<HTMLButtonElement>("#rover-forward")!.onclick = () => {
-  invoker.run(new moveCommand());
+  queue.push(new moveCommand());
+  renderQueue();
 };
 document.querySelector<HTMLButtonElement>("#rover-right")!.onclick = () => {
-  invoker.run(new turnRight());
+  queue.push(new turnRight());
+  renderQueue();
 };
 document.querySelector<HTMLButtonElement>("#rover-reset")!.onclick = () => {
   x = 2;
   y = 2;
   direction = 0;
+  queue.length = 0;
+  renderQueue();
   drawRover();
 };
+document.querySelector<HTMLButtonElement>("#rover-run")!.onclick = () => {
+  while (queue.length > 0) {
+    queue.shift()!.execute();
+  }
+  renderQueue();
+  drawRover();
+};
+document.querySelector<HTMLButtonElement>("#rover-clear")!.onclick = () => {
+  queue.length = 0;
+  renderQueue();
+};
 drawRover();
+function renderQueue() {
+  document.querySelector<HTMLButtonElement>("#rover-clear")!.disabled = false;
+  document.querySelector<HTMLButtonElement>("#rover-run")!.disabled = false;
+
+  const ul = document.querySelector<HTMLUListElement>("#rover-pending")!;
+  while (ul.firstChild !== null) {
+    ul.removeChild(ul.firstChild);
+  }
+  for (let i = 0; i < queue.length; i++) {
+    const cmd = queue[i];
+    const li = document.createElement("li");
+    li.textContent = cmd.name;
+    ul.appendChild(li);
+  }
+}
