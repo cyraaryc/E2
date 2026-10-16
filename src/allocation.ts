@@ -20,7 +20,6 @@ function shift(producers: number): shiftResults {
 }
 function update() {
   const results = shift(producers);
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
   renderBoxes(results);
   renderUI(results);
   renderReadout(results);
@@ -32,6 +31,7 @@ function renderReadout(results: shiftResults) {
     }${results.balance}`;
 }
 function renderUI(results: shiftResults) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "#233e43";
   ctx.font = "14px system-ui";
   ctx.fillText(`Producers: ${results.producers} / 6`, 18, 76);
